@@ -1,0 +1,9 @@
+POST http://localhost:8080/events
+content-type: application/json
+
+{
+    "name": "Drone Test",
+    "description": "The drone testing nu",
+    "location": "Tema Community 7",
+    "dateTime": "2026-01-16T18:08:00Z"
+}
