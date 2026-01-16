@@ -3,11 +3,15 @@ package main
 import (
 	"net/http"
 
+	"github.com/DroneBreaker/Event-Booking-API.git/db"
 	"github.com/DroneBreaker/Event-Booking-API.git/models"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	// Initialize database
+	db.InitDB()
+
 	// Setup engine
 	server := gin.Default()
 
@@ -29,7 +33,8 @@ func createEvent(c *gin.Context) {
 	err := c.ShouldBindJSON(&event)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid request payload",
+			"error":   "Invalid request payload",
+			"details": err.Error(),
 		})
 
 		return
