@@ -1,0 +1,9 @@
+PUT http://localhost:8080/events/1
+content-type: application/json
+
+{
+    "name": "Updated Drone Test",
+    "description": "The drone testing nu that has been updated",
+    "location": "New Tema Community 7",
+    "dateTime": "2026-01-16T18:08:00Z"
+}
