@@ -15,7 +15,7 @@ type Event struct {
 	UserID      int
 }
 
-var events = []Event{}
+var events []Event
 
 func (e Event) Save() error {
 	query := `
@@ -31,10 +31,12 @@ func (e Event) Save() error {
 	// if err != nil {
 	// 	return err
 	// }
+	// insert, update and delete use Exec
 	result, err := db.DB.Exec(query, e.Name, e.Description, e.Location, e.DateTime, e.UserID)
 	if err != nil {
 		return err
 	}
+	// defer db.DB.Close()
 
 	id, err := result.LastInsertId()
 	if err != nil {
@@ -42,9 +44,49 @@ func (e Event) Save() error {
 	}
 	e.ID = id
 
-	return nil
+	return err
 }
 
-func GetEvents() []Event {
-	return events
+func GetEvents() ([]Event, error) {
+	query := `SELECT * FROM events`
+
+	rows, err := db.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var events []Event
+	for rows.Next() {
+		var event Event
+		var dateTimeStr string
+
+		err := rows.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &dateTimeStr, &event.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Parse the datetime string into time.Time
+		// Parse the datetime string - try different formats
+		layouts := []string{
+			"2006-01-02 15:04:05-07:00",
+			"2006-01-02 15:04:05",
+			time.RFC3339,
+		}
+
+		var parseErr error
+		for _, layout := range layouts {
+			event.DateTime, parseErr = time.Parse(layout, dateTimeStr)
+			if parseErr == nil {
+				break
+			}
+		}
+		if parseErr != nil {
+			return nil, parseErr
+		}
+
+		events = append(events, event)
+	}
+
+	return events, nil
 }
